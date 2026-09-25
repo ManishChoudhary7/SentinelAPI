@@ -1,0 +1,47 @@
+{
+    "scanner": "SentinelAPI",
+    "target": "http://127.0.0.1:8000",
+    "total_vulnerabilities": 4,
+    "findings": [
+        {
+            "title": "Broken Object Level Authorization",
+            "vulnerability_type": "BOLA / IDOR",
+            "severity": "HIGH",
+            "endpoint": "GET /users/{user_id}",
+            "description": "An authenticated user was able to access another user's resource by changing the user ID.",
+            "evidence": "User 1 authentication token was used to access /users/2 and the API returned User 2 data with HTTP 200.",
+            "recommendation": "Implement server-side object ownership authorization for every requested resource.",
+            "poc_request": "GET /users/2 HTTP/1.1\nHost: 127.0.0.1:8000\nAuthorization: Bearer token-user-1"
+        },
+        {
+            "title": "Sensitive Data Exposure",
+            "vulnerability_type": "Excessive Data Exposure",
+            "severity": "HIGH",
+            "endpoint": "GET /users/{user_id}",
+            "description": "The API response contains sensitive fields that may not be required by the client.",
+            "evidence": "Sensitive fields detected: password_hash, api_key",
+            "recommendation": "Return only the fields required by the client and remove sensitive information from API responses.",
+            "poc_request": "GET /users/1 HTTP/1.1\nHost: 127.0.0.1:8000\nAuthorization: Bearer token-user-1"
+        },
+        {
+            "title": "Missing Authentication",
+            "vulnerability_type": "Authentication Bypass",
+            "severity": "HIGH",
+            "endpoint": "GET /profile",
+            "description": "The endpoint returned a successful response without requiring authentication.",
+            "evidence": "GET /profile was requested without an Authorization header and returned HTTP 200.",
+            "recommendation": "Require valid authentication before allowing access to protected resources.",
+            "poc_request": "GET /profile HTTP/1.1\nHost: 127.0.0.1:8000"
+        },
+        {
+            "title": "Missing Rate Limiting",
+            "vulnerability_type": "Rate Limit",
+            "severity": "MEDIUM",
+            "endpoint": "POST /login",
+            "description": "The endpoint accepted multiple consecutive requests without returning HTTP 429.",
+            "evidence": "10 out of 10 controlled requests were accepted without rate limiting.",
+            "recommendation": "Implement server-side rate limiting for sensitive endpoints such as login.",
+            "poc_request": "POST /login?username=rahul&password=1234 HTTP/1.1\nHost: 127.0.0.1:8000\nContent-Type: application/json"
+        }
+    ]
+}
